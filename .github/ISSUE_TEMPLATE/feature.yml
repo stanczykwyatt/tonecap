@@ -1,0 +1,15 @@
+name: Idea
+description: A material, switch, setting or feature you'd like.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+      description: For a sound, describe how it should sound compared to an existing build, with its link. Please don't attach recordings.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why would it help?

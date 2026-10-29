@@ -1,0 +1,213 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The runner's own Node is enough: the engine and its tests have no dependencies.
+      - name: Run the engine's tests
+        run: node --test test/
+
+      - name: Check the Swift tests compare against the current engine
+        run: node scripts/make-fixtures.mjs --check
+
+      - name: Check the playground never connects to anything
+        run: |
+          # The page and the engine load only their own files, never send anything, and keep nothing.
+          if grep -nE 'fetch\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon|importScripts|\bimport\(|localStorage|sessionStorage|indexedDB|caches\.|navigator\.storage|document\.cookie|new (Shared)?Worker|serviceWorker|BroadcastChannel|RTCPeerConnection|RTCDataChannel|navigator\.(geolocation|mediaDevices|share)|getUserMedia|window\.open|location\.(assign|replace)\(|location\.href *=|new Image|eval\(|new Function|setTimeout\(["'"'"']|innerHTML|outerHTML|insertAdjacentHTML|document\.write' docs/*.js docs/engine/*.js; then
+            echo "::error::The playground must not connect, store, record or build HTML from strings."
+            exit 1
+          fi
+          # Every src and href is the site's own file, or a plain link out to GitHub or the author's site.
+          if grep -noE '(src|href)="[^"]*"' docs/index.html | grep -vE '"(#[^"]*|[a-z0-9][a-z0-9.-]*(/[a-z0-9][a-z0-9.-]*)*\.(png|gif|js|css|xml)|https://github\.com/stanczykwyatt/[^"]*|https://stanczykwyatt\.github\.io/[^"]*|https://wyattstanczyk\.com/?|https://opensource\.org/licenses/MIT)"$'; then
+            echo "::error::docs/index.html may only load its own files."
+            exit 1
+          fi
+          if grep -nE "(src|href|action|srcset|data|poster)='|<(iframe|object|embed|form|base|link rel=\"(preload|prefetch|preconnect|dns-prefetch))" docs/index.html; then
+            echo "::error::Only double-quoted attributes, and no frames, forms, base or prefetching."
+            exit 1
+          fi
+          # The policy must be exactly this one, and appear once.
+          policy="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; media-src 'self' blob:; base-uri 'none'; form-action 'none'"
+          if [ "$(grep -c 'http-equiv="Content-Security-Policy"' docs/index.html)" -ne 1 ] || ! grep -qF "content=\"$policy\"" docs/index.html; then
+            echo "::error::The playground's Content-Security-Policy must be exactly: $policy"
+            exit 1
+          fi
+          echo "No connections, storage or remote files."
+
+  app:
+    runs-on: macos-15
+    env:
+      # What the app must never do, checked line by line and again with calls split across lines joined.
+      NETWORK: 'URLSession|URLComponents|URLRequest|NSURL\b|NSURLRequest|fileURLWithPath|AVPlayer|AVURLAsset|AVAsset\b|Darwin\.(socket|connect)|NWConnection|NWListener|NWBrowser|NWPathMonitor|CFSocket|CFStream|NSURLConnection|WKWebView|getaddrinfo|(^|[^.[:alnum:]_])(socket|connect) *\(|contentsOf: *URL\(string|openApplication|LSOpen|NSAppleScript|NSAppleEventDescriptor|AESend|SBApplication|NSUserAppleScriptTask|SMJobBless|NSXPCConnection|task_for_pid|ptrace|posix_spawn|\bProcess\b|NSTask|CFHTTP|OSAScript|NSUserScriptTask|launchApplication|dlsym|dlopen|NSUserUnixTask|\bexec(l|lp|le|v|vp|ve|vP) *\(|\bfork *\(|\bvfork|popen|(^|[^[:alnum:]_])Link\('
+      # Never characters, never other kinds of input, never posting events, never the screen or the microphone.
+      INPUT: 'keyboardGetUnicodeString|NSEvent\(|cgEvent|CGEventCreateData|\.data\(allocator|tapPostEvent|postEvent|CGEventField\(|keyboardSetUnicodeString|charactersIgnoringModifiers|\.characters\b|UCKeyTranslate|TISCopy|TISGetInputSourceProperty|kTISProperty|NSTextInputContext|addGlobalMonitorForEvents|addLocalMonitorForEvents|IOHID|CGEventSourceKeyState|CGEventPost|postToPid|\.post\(tap|getDoubleValueField|mouseEvent|scrollWheelEvent|AXUIElement|kAX|AXIsProcessTrusted|CGWindowListCreateImage|CGWindowListCopyWindowInfo|SCShareableContent|SCStream|CGDisplayCreateImage|inputNode|AVAudioRecorder|AVCaptureDevice|AVAudioSession|installTap|\.string\(forType|readObjects|pasteboardItems|\.data\(forType'
+      FILES: 'contentsOfDirectory|enumerator\(at|enumerator\(atPath|subpathsOfDirectory|subpaths\(atPath|Data\(contentsOf|contents\(atPath|String\(contentsOf|FileHandle|fopen\(|freopen\(|(^|[^.[:alnum:]_])open *\(|openat\(|opendir\(|readdir\(|mmap\(|\.write\(to:|\.write\(toFile|createFile|copyItem|moveItem|linkItem|removeItem|trashItem|recycle\(|createDirectory|setAttributes|createSymbolicLink|unlink\(|rmdir\(|\bmkdir *\(|rename\(|truncate\(|copyfile\(|clonefile\(|setxattr\(|NSDictionary\(contentsOf|NSArray\(contentsOf|NSData\(contentsOf|NSImage\(contentsOf|contentsOfFile|InputStream\(|OutputStream\(|sqlite3_open|NSFileCoordinator|NSMetadataQuery|\bglob\(|fts_open|MDQuery|AVAudioFile|ExtAudioFile|AudioFileCreate|CFPreferences|UserDefaults\(suiteName|NSUbiquitousKeyValueStore'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Run tests
+        run: swift test
+
+      - name: Build the app
+        run: scripts/build-app.sh
+
+      - name: Check the app has no entitlements and the hardened runtime
+        run: |
+          binary="build/Tonecap.app"
+          entitlements="$(codesign -d --entitlements - --xml "$binary" 2>/dev/null || true)"
+          if grep -q "<key>" <<< "$entitlements"; then
+            echo "$entitlements"
+            echo "::error::Tonecap must have no entitlements: no network, no microphone, no sandbox exceptions."
+            exit 1
+          fi
+          if ! codesign -dv "$binary" 2>&1 | grep -q "flags=.*runtime"; then
+            echo "::error::$binary must be signed with the hardened runtime."
+            exit 1
+          fi
+          # An ad-hoc build's default requirement names its exact code. One that names only an
+          # identifier would let another program pass itself off as this one and use its Input Monitoring.
+          requirement="$(codesign -d -r- "$binary" 2>&1 | grep 'designated =>' || true)"
+          if ! grep -qE '^# designated => cdhash H"[0-9a-f]+"( or cdhash H"[0-9a-f]+")*$' <<< "$requirement"; then
+            echo "$requirement"
+            echo "::error::$binary must keep the default requirement, which names its exact build."
+            exit 1
+          fi
+          for key in NSAppleEventsUsageDescription NSMicrophoneUsageDescription CFBundleURLTypes; do
+            if /usr/libexec/PlistBuddy -c "Print :$key" Resources/Info.plist 2>/dev/null; then
+              echo "::error::Tonecap must not declare $key."
+              exit 1
+            fi
+          done
+          echo "No entitlements, hardened runtime, default requirement."
+
+      - name: Check the app never uses the network or starts programs
+        run: |
+          if grep -rnE "$NETWORK" Sources; then
+            echo "::error::Tonecap must not use the network, send Apple Events or start other programs."
+            exit 1
+          fi
+          # It opens two things, both from Links.swift: the Input Monitoring settings page and the playground.
+          found="$(grep -rnE 'NSWorkspace[^)]*\.open\(|\.open\(|openURL' Sources | grep -vE '^Sources/Tonecap/Links.swift:.*NSWorkspace.shared.open\((settingsURL|url)\)$' || true)"
+          if [ -n "$found" ]; then
+            echo "$found"
+            echo "::error::Only Links.swift may open anything."
+            exit 1
+          fi
+          if grep -rn 'URL(string:' Sources | grep -v '^Sources/Tonecap/Links.swift:'; then
+            echo "::error::Only Links.swift names a URL."
+            exit 1
+          fi
+          if ! grep -q 'url.host == "stanczykwyatt.github.io"' Sources/Tonecap/Links.swift; then
+            echo "::error::The playground link must be checked to be the project's own site."
+            exit 1
+          fi
+          echo "No networking, child processes or Apple Events; only two links opened."
+
+      - name: Check it hears key codes only, and only by listening
+        run: |
+          if grep -rnE "$INPUT" Sources; then
+            echo "::error::Tonecap must never read characters, post events, read the screen or the microphone, or read the clipboard."
+            exit 1
+          fi
+          check() {
+            local pattern="$1" file="$2" what="$3"
+            found="$(grep -rnE "$pattern" Sources | grep -v "^Sources/Tonecap/$file:" || true)"
+            if [ -n "$found" ]; then
+              echo "$found"
+              echo "::error::Only $file may $what."
+              exit 1
+            fi
+          }
+          check 'tapCreate|CGEventTap|CGEvent\.|CGPreflightListenEventAccess|CGRequestListenEventAccess|getIntegerValueField' KeyListener.swift 'listen to keys'
+          check 'RegisterEventHotKey|InstallEventHandler' Hotkey.swift 'register a shortcut'
+          check 'NSPasteboard' Links.swift 'use the clipboard'
+          check 'UserDefaults' Model.swift 'keep settings'
+          check 'AVAudioEngine|AVAudioPlayerNode|AudioUnitSetProperty' Player.swift 'play sound'
+          # One tap, listen-only, for key down, key up and modifier changes, reading two fields.
+          [ "$(grep -c 'tapCreate' Sources/Tonecap/KeyListener.swift)" -eq 1 ] || { echo "::error::One event tap only."; exit 1; }
+          grep -q 'options: .listenOnly' Sources/Tonecap/KeyListener.swift || { echo "::error::The event tap must be listen-only."; exit 1; }
+          # Everything read from an event, listed: the key code, the auto-repeat flag and the modifier flags.
+          reads="$(grep -oE '\bevent\.[A-Za-z]+(\([^)]*\))?' Sources/Tonecap/KeyListener.swift | sort -u | tr '\n' ' ')"
+          if [ "$reads" != "event.flags event.getIntegerValueField(.keyboardEventAutorepeat) event.getIntegerValueField(.keyboardEventKeycode) " ]; then
+            echo "Reads: $reads"
+            echo "::error::Only the key code, the auto-repeat flag and the modifier flags may be read from an event."
+            exit 1
+          fi
+          if [ "$(grep -c 'getIntegerValueField' Sources/Tonecap/KeyListener.swift)" -ne 2 ] || grep -nE '\bevent\b[^.]|\bevent$' Sources/Tonecap/KeyListener.swift | grep -vE '^[0-9]+: *//|, event, refcon in$|Unmanaged\.passUnretained\(event\)( })?$'; then
+            echo "::error::The event may only be read through those three fields, and passed on unchanged."
+            exit 1
+          fi
+          calls="$(grep -oE 'CGEvent\.[A-Za-z]+' Sources/Tonecap/KeyListener.swift | sort -u | tr '\n' ' ')"
+          if [ "$calls" != "CGEvent.tapCreate CGEvent.tapEnable CGEvent.tapIsEnabled " ]; then
+            echo "Calls: $calls"
+            echo "::error::KeyListener may only create, enable and check its tap."
+            exit 1
+          fi
+          if grep -nE 'CGEventType\.(leftMouse|rightMouse|otherMouse|mouseMoved|scrollWheel|tabletPointer)' Sources/Tonecap/KeyListener.swift; then
+            echo "::error::Tonecap listens to keys only."
+            exit 1
+          fi
+          echo "Listen-only, key codes and auto-repeat only, no characters, each powerful call in its one file."
+
+      - name: Check no file is read, written or deleted
+        run: |
+          if grep -rnE "$FILES" Sources; then
+            echo "::error::Tonecap must never open, write or delete a file. Settings go through UserDefaults."
+            exit 1
+          fi
+          echo "No files read or written."
+
+      - name: Check what the built app links and calls
+        run: |
+          binary="build/Tonecap.app/Contents/MacOS/Tonecap"
+          libraries="$(otool -L "$binary" | tail -n +2)"
+          if grep -E 'Network\.framework|CFNetwork|WebKit|OSAKit|ScriptingBridge|AppleScriptObjC|Security\.framework|ScreenCaptureKit|IOKit\.framework|AVFoundation\.framework/|ApplicationServices' <<< "$libraries"; then
+            echo "::error::Tonecap must not link networking, scripting, web, screen capture or device frameworks."
+            exit 1
+          fi
+          for arch in arm64 x86_64; do
+            symbols="$(nm -u -arch "$arch" "$binary")"
+            if grep -E '^_(socket|connect|getaddrinfo|dlsym|dlopen|posix_spawnp?|fork|vfork|execv[ep]?|execl[ep]?|system|popen|CGEventPost|CGEventPostToPid|CGEventPostToPSN|CGEventTapPostEvent|CGEventCreateData|CGEventCreateCopy|CGEventKeyboardGetUnicodeString|UCKeyTranslate|TISCopy.*|CGWindowListCreateImage|AXUIElement.*|IOHID.*|AESend.*|AudioDeviceCreateIOProcID|CGEventGetDoubleValueField)$|URLSession|NSTask|NSAppleScript|WKWebView|OSAScript|NWConnection|AVAudioRecorder|AVCaptureDevice' <<< "$symbols"; then
+              echo "::error::The $arch binary imports something Tonecap must never call."
+              exit 1
+            fi
+            if ! grep -q '^_CGEventTapCreate$' <<< "$symbols"; then
+              echo "::error::Expected the event tap import; the check above may be looking at the wrong file."
+              exit 1
+            fi
+          done
+          echo "Links nothing it shouldn't, and imports no networking, process, posting, character or capture calls."
+
+      - name: Check calls split across lines too
+        run: |
+          joined="$(find Sources -name '*.swift' -exec cat {} + | perl -0pe 's/\(\s+/(/g; s/\s*\n\s*\././g; s/:\s*\n\s*/: /g')"
+          for name in NETWORK INPUT FILES; do
+            if grep -E "${!name}" <<< "$joined"; then
+              echo "::error::A call split across lines matches the $name check."
+              exit 1
+            fi
+          done
+          echo "Nothing found with calls joined."
+
+      - name: Check there are no dependencies
+        run: |
+          if grep -nE '\.package\(|binaryTarget|\.plugin\(|unsafeFlags|linkerSettings|linkedLibrary|linkedFramework' Package.swift; then
+            echo "::error::Tonecap has no dependencies, so every line that runs is in this repository."
+            exit 1
+          fi
+          if grep -nE '"(dependencies|devDependencies|optionalDependencies)"' package.json; then
+            echo "::error::The engine has no npm dependencies."
+            exit 1
+          fi
+          echo "No dependencies."

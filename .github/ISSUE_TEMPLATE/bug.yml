@@ -1,0 +1,36 @@
+name: Bug report
+description: Something that isn't working, in the app or the playground.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What were you doing, what did you expect, and what happened instead? Please don't paste anything you typed while it was running.
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: The sound's link
+      description: From the playground's Copy link, or the app's Share tab, if it's about a sound.
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options:
+        - The Mac app
+        - The playground
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The Mac app's version, or the browser and its version for the playground.
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: macOS version, and the keyboard and audio output if it matters

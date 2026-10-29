@@ -1,0 +1,14 @@
+{
+  "name": "tonecap",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mechanical keyboard sounds made from numbers, with no recordings.",
+  "license": "MIT",
+  "type": "module",
+  "exports": "./docs/engine/tonecap.js",
+  "scripts": {
+    "test": "node --test test/",
+    "fixtures": "node scripts/make-fixtures.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

@@ -1,0 +1,39 @@
+name: Release app
+
+# When a release is published, builds Tonecap.zip from the release's tag on a clean runner, runs the
+# tests first, and attaches it with its SHA-256 and the build's code hash. So the download is the
+# build CI checked, and anyone can compare the hash with `codesign -dvvv /Applications/Tonecap.app`.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  app:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.release.tag_name }}
+      - name: Test
+        run: swift test
+      - name: Build
+        run: |
+          scripts/build-app.sh
+          ditto -c -k --keepParent build/Tonecap.app build/Tonecap.zip
+          (cd build && shasum -a 256 Tonecap.zip > Tonecap.zip.sha256)
+          codesign -dvvv build/Tonecap.app 2>&1 | grep -E '^CDHash=' > build/Tonecap.cdhash.txt
+          cat build/Tonecap.zip.sha256 build/Tonecap.cdhash.txt
+      - name: Check it has no entitlements
+        run: |
+          if codesign -d --entitlements - --xml build/Tonecap.app 2>/dev/null | grep -q "<key>"; then
+            echo "::error::Tonecap must have no entitlements."
+            exit 1
+          fi
+      - name: Attach to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$TAG" build/Tonecap.zip build/Tonecap.zip.sha256 build/Tonecap.cdhash.txt --clobber

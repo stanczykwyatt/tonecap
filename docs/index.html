@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; media-src 'self' blob:; base-uri 'none'; form-action 'none'">
+  <title>Tonecap: design your mechanical keyboard's sound, no recordings</title>
+  <meta name="description" content="Tonecap makes mechanical keyboard sounds from numbers, with no recordings. Pick a switch, spring, lube, plate, case, foam and keycaps, type to hear it, compare two builds, export a WAV and share the link. A free Mac menu bar app plays your sound as you type.">
+  <meta name="keywords" content="mechanical keyboard sound simulator, keyboard sound generator, thock sound, keyboard sound designer, mechvibes alternative, typing sounds mac, keyboard sounds menu bar app, synthesized keyboard sound">
+  <link rel="canonical" href="https://stanczykwyatt.github.io/tonecap/">
+  <link rel="icon" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="stylesheet" href="playground.css">
+  <meta name="theme-color" content="#0d0f12">
+  <meta name="color-scheme" content="dark">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Tonecap">
+  <meta property="og:title" content="Tonecap: design your keyboard's sound">
+  <meta property="og:description" content="Mechanical keyboard sounds made from numbers, not recordings. Build a board, type to hear it, share the link. Free and open source.">
+  <meta property="og:url" content="https://stanczykwyatt.github.io/tonecap/">
+  <meta property="og:image" content="https://stanczykwyatt.github.io/tonecap/social.png">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
+  <meta property="og:image:alt" content="Tonecap: design your keyboard's sound.">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Tonecap",
+    "description": "Mechanical keyboard sounds synthesized from a model of the switch, plate, case and keycaps, with no recordings. A free web playground with shareable links, A/B comparison and WAV export, and a Mac menu bar app that plays the sound as you type.",
+    "operatingSystem": "Any modern browser; the type-along app needs macOS 14 or later",
+    "applicationCategory": "MultimediaApplication",
+    "url": "https://stanczykwyatt.github.io/tonecap/",
+    "downloadUrl": "https://github.com/stanczykwyatt/tonecap/releases/latest/download/Tonecap.zip",
+    "softwareVersion": "0.1.0",
+    "datePublished": "2026-11-25",
+    "dateModified": "2026-11-25",
+    "releaseNotes": "https://github.com/stanczykwyatt/tonecap/releases/tag/v0.1.0",
+    "featureList": [
+      "Keyboard sounds made from numbers, with no recordings",
+      "Linear, tactile and clicky switches, spring weight, lube, bottom-out and top-out",
+      "Aluminum, brass, polycarbonate, FR4 and POM plates; plastic, aluminum and wood cases; foam",
+      "PBT or ABS keycaps, thickness and profile; deeper wide keys and stabilizers; stereo by key position",
+      "The whole build in a shareable link",
+      "A/B comparison and WAV export",
+      "A Mac menu bar app that plays the sound as you type, with volume, a mute shortcut and per-app mute",
+      "No recordings, no tracking, and no internet access in the app"
+    ],
+    "image": "https://stanczykwyatt.github.io/tonecap/icon.png",
+    "screenshot": "https://stanczykwyatt.github.io/tonecap/screenshot-board.png",
+    "license": "https://opensource.org/licenses/MIT",
+    "isAccessibleForFree": true,
+    "author": { "@type": "Person", "name": "Wyatt Stanczyk", "url": "https://wyattstanczyk.com" },
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Are these real recordings of keyboards?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. Every sound is made from numbers: short pulses for the stem hitting bottom and top, a click, the scrape of the stem, and tuned resonators for the keycap, plate, case, spring and stabilizers. It's a model you can play with, not a copy of any particular keyboard." }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I share my keyboard sound?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Click Copy link. The whole build is in the link, after the #, so it opens the same sound for anyone, and nothing is stored on a server." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I hear it while I type in other apps?",
+        "acceptedAnswer": { "@type": "Answer", "text": "On a Mac, yes. The free Tonecap menu bar app imports a link from the playground and plays the sound as you type anywhere, with volume, a mute shortcut and per-app mute. It needs Input Monitoring, learns only which key went down or up, never what you type, and has no internet access." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Tonecap a Mechvibes alternative?",
+        "acceptedAnswer": { "@type": "Answer", "text": "It does the same job of playing keyboard sounds as you type, in a different way: Mechvibes and similar apps play recorded sound packs, while Tonecap builds the sound from switch, plate, case and keycap settings you can change." }
+      },
+      {
+        "@type": "Question",
+        "name": "Does the playground send my typing anywhere?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. It runs entirely in your browser, loads only its own files, makes no network requests and keeps nothing. What you type in the test box stays on the page." }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <div class="scene" aria-hidden="true"></div>
+  <main class="glass">
+    <div class="edge" aria-hidden="true"></div>
+    <div class="content">
+      <nav class="bar" aria-label="Site">
+        <a class="label" href="https://github.com/stanczykwyatt/tonecap/releases/tag/v0.1.0">tonecap · v0.1<span class="new"> · what's new</span></a>
+        <a class="label" href="https://github.com/stanczykwyatt/tonecap">github ↗</a>
+      </nav>
+
+      <section class="center">
+        <div class="title">
+          <img class="icon" src="icon.png" alt="" width="76" height="76">
+          <h1>Tonecap</h1>
+        </div>
+        <p class="lede">Design your keyboard's sound. Every click and thock here is made from numbers, not recordings: pick a switch, a plate, a case and keycaps, then type to hear it.</p>
+
+        <div class="studio">
+          <div class="card">
+            <div id="controls"></div>
+          </div>
+          <div class="side">
+            <div class="card side">
+              <label class="cap" for="box">Type here to hear it</label>
+              <textarea id="box" spellcheck="false" autocomplete="off" placeholder="Start typing… nothing you type leaves this page."></textarea>
+              <div class="tools">
+                <button class="tool solid" id="share" type="button">Copy link</button>
+                <button class="tool" id="sample" type="button">▶ Play a sample</button>
+                <button class="tool" id="wav" type="button">Download WAV</button>
+              </div>
+              <p id="note" role="status" aria-live="polite"></p>
+            </div>
+            <div class="card side">
+              <span class="cap">Compare</span>
+              <div class="slots">
+                <button class="slot" id="slot-a" type="button" aria-pressed="true" aria-label="Edit and play build A">A</button>
+                <button class="slot" id="slot-b" type="button" aria-pressed="false" aria-label="Edit and play build B">B</button>
+                <button class="tool" id="copy-ab" type="button">Copy to the other</button>
+              </div>
+              <p class="hint">Switch between A and B while you type to hear the difference. Both go in the link.</p>
+              <span class="cap">Presets</span>
+              <div id="presets"></div>
+              <label class="volume"><span>Volume</span><input id="volume" type="range" min="0" max="100" value="70"></label>
+              <span id="code" title="This build's code"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="mac-title">
+        <h2 id="mac-title">Hear it as you type, anywhere</h2>
+        <div class="mac">
+          <img class="shot" src="screenshot-board.png" width="340" height="456" alt="Tonecap's dark settings panel under the menu bar: tabs for Switch, Board, Output and Share, with plate, case, foam, keycap, thickness, profile and stabilizer controls, set to the Deep thock preset." loading="lazy">
+          <ul class="verdicts">
+            <li class="key"><b>A free Mac menu bar app</b> plays your sound as you type in any app, from buffers rendered ahead of time.</li>
+            <li><b>Paste a link from here</b> to bring a build across, or pick a preset.</li>
+            <li><b>Volume, ⌃⌥M to mute</b>, and quiet in the apps you choose, like a video call.</li>
+            <li class="key"><b>Never sees what you type.</b> It learns only which key went down or up, plays nothing in password fields, keeps nothing and has no internet access.</li>
+          </ul>
+        </div>
+        <div class="actions">
+          <a class="button solid" href="https://github.com/stanczykwyatt/tonecap/releases/latest/download/Tonecap.zip">Download for Mac</a>
+          <a class="button" href="https://github.com/stanczykwyatt/tonecap">
+            <svg class="star" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.4l1.95 4.02 4.43.6-3.23 3.08.79 4.4L8 11.38 4.06 13.5l.79-4.4L1.62 6.02l4.43-.6z"/></svg>
+            Star on GitHub
+          </a>
+        </div>
+        <p class="label">free · open source · macos 14+ · no recordings · no internet access</p>
+      </section>
+
+      <section class="section" aria-labelledby="how-title">
+        <h2 id="how-title">How the sound is made</h2>
+        <ul class="verdicts">
+          <li><b>A press is a few small events:</b> the stem scraping its housing, a tactile bump or a click, the stem bottoming out, and on wide keys the stabilizer wires knocking. A release is the stem hitting the top.</li>
+          <li><b>Each event rings tuned resonators</b> standing for the keycap, plate, case, desk and spring. A hard hit is a short pulse that reaches the high ones; a soft one only reaches the low ones.</li>
+          <li><b>Materials change pitch, ring and level.</b> Brass rings low and long, polycarbonate is soft and short, foam damps the case, thick PBT is deeper than thin ABS, and wide keys are deeper still.</li>
+          <li class="key"><b>Every press is a little different,</b> from a seed, so fast typing doesn't sound like a loop. It's a model to play with, not a copy of any real keyboard.</li>
+        </ul>
+      </section>
+
+      <section class="section" aria-labelledby="faq-title">
+        <h2 id="faq-title">Questions</h2>
+        <details>
+          <summary>Are these real recordings of keyboards?</summary>
+          <p>No. Every sound is made from numbers: short pulses for the stem hitting bottom and top, a click, the scrape of the stem, and tuned resonators for the keycap, plate, case, spring and stabilizers. It's a model you can play with, not a copy of any particular keyboard.</p>
+        </details>
+        <details>
+          <summary>How do I share my keyboard sound?</summary>
+          <p>Click <b>Copy link</b>. The whole build is in the link, after the <code>#</code>, so it opens the same sound for anyone, and nothing is stored on a server.</p>
+        </details>
+        <details>
+          <summary>Can I hear it while I type in other apps?</summary>
+          <p>On a Mac, yes. The free <a href="https://github.com/stanczykwyatt/tonecap/releases/latest/download/Tonecap.zip">Tonecap menu bar app</a> imports a link from here and plays the sound as you type anywhere. It needs Input Monitoring, learns only which key went down or up, never what you type, and has no internet access. <a href="https://github.com/stanczykwyatt/tonecap/blob/main/SECURITY.md">The details are in SECURITY.md</a>.</p>
+        </details>
+        <details>
+          <summary>Is it a Mechvibes alternative?</summary>
+          <p>It does the same job, playing keyboard sounds as you type, in a different way: apps like Mechvibes play recorded sound packs, while Tonecap builds the sound from settings you can change.</p>
+        </details>
+        <details>
+          <summary>Does the playground send my typing anywhere?</summary>
+          <p>No. It runs entirely in your browser, loads only its own files, makes no network requests and keeps nothing. What you type in the test box stays on the page.</p>
+        </details>
+        <details>
+          <summary>Can I use the sound engine in my own project?</summary>
+          <p>Yes. It's one dependency-free JavaScript file, <a href="https://github.com/stanczykwyatt/tonecap/blob/main/docs/engine/tonecap.js">docs/engine/tonecap.js</a>, MIT licensed, with a matching Swift version in the repository.</p>
+        </details>
+      </section>
+
+      <footer class="foot">
+        <p>Also free: <a href="https://stanczykwyatt.github.io/show-desktop/">Show Desktop</a>, <a href="https://stanczykwyatt.github.io/copy-2fa/">Copy 2FA</a>, <a href="https://stanczykwyatt.github.io/who-stole-my-focus/">Who Stole My Focus</a>, <a href="https://stanczykwyatt.github.io/ai-footprint/">AI Footprint</a>, <a href="https://stanczykwyatt.github.io/memo-export/">Memo Export</a>, <a href="https://stanczykwyatt.github.io/podcast-export/">Podcast Export</a>, <a href="https://stanczykwyatt.github.io/reading-list-export/">Reading List Export</a>, <a href="https://stanczykwyatt.github.io/unblock-eject/">Unblock Eject</a>, <a href="https://stanczykwyatt.github.io/next-departures/">Next Departures</a>, <a href="https://stanczykwyatt.github.io/right-folder/">Right Folder</a> and <a href="https://stanczykwyatt.github.io/mulligan/">mulligan</a>.</p>
+        <p>Tonecap collects no data, and this site has no cookies or tracking. MIT License. Preset names describe sounds and aren't any product's. Apple, Mac and macOS are trademarks of Apple Inc. Mechvibes is named only to say what this is an alternative to.</p>
+      </footer>
+    </div>
+  </main>
+  <script type="module" src="playground.js"></script>
+</body>
+</html>
