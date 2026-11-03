@@ -35,7 +35,7 @@
 
 ---
 
-Every keyboard sound app plays recordings. That's fine until you want to know what *your* build would sound like: a heavier spring, a brass plate, more foam, thicker caps.
+Most keyboard sound apps play recordings. That's fine until you want to know what *your* build would sound like: a heavier spring, a brass plate, more foam, thicker caps.
 
 Tonecap builds the sound instead. A key press is a few small events (the stem scraping its housing, a tactile bump or a click, the stem bottoming out, the stabilizer wires knocking), and each one rings tuned resonators standing for the keycap, the plate, the case, the desk and the spring. Change a material and the pitch, the ring and the level change with it. Every press is a little different, so fast typing doesn't sound like a loop.
 

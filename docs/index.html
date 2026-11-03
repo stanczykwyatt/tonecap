@@ -58,38 +58,61 @@
   }
   </script>
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Are these real recordings of keyboards?",
-        "acceptedAnswer": { "@type": "Answer", "text": "No. Every sound is made from numbers: short pulses for the stem hitting bottom and top, a click, the scrape of the stem, and tuned resonators for the keycap, plate, case, spring and stabilizers. It's a model you can play with, not a copy of any particular keyboard." }
-      },
-      {
-        "@type": "Question",
-        "name": "How do I share my keyboard sound?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Click Copy link. The whole build is in the link, after the #, so it opens the same sound for anyone, and nothing is stored on a server." }
-      },
-      {
-        "@type": "Question",
-        "name": "Can I hear it while I type in other apps?",
-        "acceptedAnswer": { "@type": "Answer", "text": "On a Mac, yes. The free Tonecap menu bar app imports a link from the playground and plays the sound as you type anywhere, with volume, a mute shortcut and per-app mute. It needs Input Monitoring, learns only which key went down or up, never what you type, and has no internet access." }
-      },
-      {
-        "@type": "Question",
-        "name": "Is Tonecap a Mechvibes alternative?",
-        "acceptedAnswer": { "@type": "Answer", "text": "It does the same job of playing keyboard sounds as you type, in a different way: Mechvibes and similar apps play recorded sound packs, while Tonecap builds the sound from switch, plate, case and keycap settings you can change." }
-      },
-      {
-        "@type": "Question",
-        "name": "Does the playground send my typing anywhere?",
-        "acceptedAnswer": { "@type": "Answer", "text": "No. It runs entirely in your browser, loads only its own files, makes no network requests and keeps nothing. What you type in the test box stays on the page." }
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Are these real recordings of keyboards?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Every sound is made from numbers: short pulses for the stem hitting bottom and top, a click, the scrape of the stem, and tuned resonators for the keycap, plate, case, spring and stabilizers. It's a model you can play with, not a copy of any particular keyboard."
       }
-    ]
-  }
-  </script>
+    },
+    {
+      "@type": "Question",
+      "name": "How do I share my keyboard sound?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Click Copy link. The whole build is in the link, after the #, so it opens the same sound for anyone, and nothing is stored on a server."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I hear it while I type in other apps?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "On a Mac, yes. The free Tonecap menu bar app imports a link from here and plays the sound as you type anywhere. It needs Input Monitoring, learns only which key went down or up, never what you type, and has no internet access. The details are in SECURITY.md."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it a Mechvibes alternative?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It does the same job, playing keyboard sounds as you type, in a different way: apps like Mechvibes play recorded sound packs, while Tonecap builds the sound from settings you can change."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the playground send my typing anywhere?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. It runs entirely in your browser, loads only its own files, makes no network requests and keeps nothing. What you type in the test box stays on the page."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use the sound engine in my own project?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. It's one dependency-free JavaScript file, docs/engine/tonecap.js, MIT licensed, with a matching Swift version in the repository."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
   <div class="scene" aria-hidden="true"></div>
