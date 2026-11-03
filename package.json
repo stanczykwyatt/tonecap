@@ -7,7 +7,7 @@
   "type": "module",
   "exports": "./docs/engine/tonecap.js",
   "scripts": {
-    "test": "node --test test/",
+    "test": "node --test test/*.test.js",
     "fixtures": "node scripts/make-fixtures.mjs"
   },
   "engines": { "node": ">=20" }

@@ -11,7 +11,7 @@ The most useful report is a build and a sentence: "this link, and the brass plat
 You need Node 20 or later for the engine, and macOS 14 or later with Swift 6 (Xcode 16 or the Command Line Tools) for the app.
 
 ```bash
-node --test test/                 # the engine's tests
+node --test test/*.test.js                 # the engine's tests
 node scripts/analyze.mjs          # how each preset's sound is spread across the spectrum
 swift test                        # the Swift port, the app's glue and its panel
 scripts/build-app.sh              # build Tonecap.app into ./build
@@ -60,7 +60,7 @@ No test listens to your keys, posts an event, plays through your speakers or put
 - **Least access.** No entitlements, and no new permissions without a very good reason.
 - **No new dependencies** without a very good reason. There are none today, in Swift or npm.
 - **Generic preset names** that describe a sound, never a product's name.
-- Run `node --test test/` and `swift test` before opening a pull request.
+- Run `node --test test/*.test.js` and `swift test` before opening a pull request.
 - Keep commits small, with a short message saying what changed and why.
 
 ## Security issues

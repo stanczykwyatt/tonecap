@@ -4,7 +4,7 @@
 
 ## Checklist
 
-- [ ] `node --test test/` and `swift test` pass
+- [ ] `node --test test/*.test.js` and `swift test` pass
 - [ ] A change to the engine is made in both `docs/engine/tonecap.js` and `Sources/ToneCore`, with `node scripts/make-fixtures.mjs` run
 - [ ] No recorded sound of any kind
 - [ ] No new permissions, entitlements or dependencies (or explained above)

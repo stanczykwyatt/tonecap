@@ -16,7 +16,7 @@ jobs:
 
       # The runner's own Node is enough: the engine and its tests have no dependencies.
       - name: Run the engine's tests
-        run: node --test test/
+        run: node --test test/*.test.js
 
       - name: Check the Swift tests compare against the current engine
         run: node scripts/make-fixtures.mjs --check
